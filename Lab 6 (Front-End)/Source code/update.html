@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Update User Data</title>
+    <style>
+        body {
+            background-image: url(/image/background.jpg);
+            background-size: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #163878;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            /* Center the form horizontally */
+            margin-top: 40px;
+            /* Add a top margin for spacing */
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            margin-top: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #6c63ff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #574fed;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Update Form</h1>
+    <form id="updateForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age">
+
+        <button type="submit">Update</button>
+    </form>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import {
+            getDatabase,
+            ref,
+            update,
+            onValue,
+        } from "https://www.gstatic.com/firebasejs/9.22/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        // Make sure to replace this with your own Firebase project's config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAd22DaTidKmnAegLlAJkZMLhkUcuAeJ9E",
+            authDomain: "aloha-a9dd0.firebaseapp.com",
+            databaseURL: "https://aloha-a9dd0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "aloha-a9dd0",
+            storageBucket: "aloha-a9dd0.appspot.com",
+            messagingSenderId: "382680700417",
+            appId: "1:382680700417:web:36b00bc4b6c4774da05200",
+            measurementId: "G-1C2C9GTWES"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
+
+        // Reference to the "person" collection in Firebase
+        const peopleRef = ref(db, "person");
+
+        // Get the ID of the user to update from the URL query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+
+        // Get the form element
+        const updateForm = document.querySelector("#updateForm");
+
+        // Add an event listener to the form submit button
+        updateForm.addEventListener("submit", handleUpdate);
+
+        // Function to handle the form submit event
+        function handleUpdate(event) {
+            event.preventDefault();
+
+            // Get the updated data from the form
+            const name = updateForm.name.value;
+            const age = updateForm.age.value;
+
+            // Update the data in Firebase
+            update(ref(db, `person/${id}`), {
+                name,
+                age,
+            })
+                .then(() => {
+                    alert("Data Updated Successfully!");
+                    // Redirect the user to the userInfo.html page after successful update
+                    window.location.href = "status.html";
+                })
+                .catch((error) => {
+                    alert("Error updating data: " + error);
+                });
+        }
+
+        // Listen for changes to the data in Firebase
+        onValue(peopleRef, (snapshot) => {
+            // Loop through each child snapshot
+            snapshot.forEach((childSnapshot) => {
+                const { ID, name, age } = childSnapshot.val();
+
+                // If the ID matches the selected ID, update the form fields with the previous data
+                if (ID === id) {
+                    updateForm.name.value = name;
+                    updateForm.age.value = age;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
